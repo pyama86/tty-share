@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"net"
+	"os"
 
 	"github.com/hashicorp/yamux"
 	log "github.com/sirupsen/logrus"
@@ -30,11 +31,18 @@ type proxyConnection struct {
 	PublicURL       string
 }
 
-func NewProxyConnection(backConnAddrr, proxyAddr string, noTLS bool) (*proxyConnection, error) {
+type TLSConfig struct {
+	NoTLS bool
+	CA    string
+	Cert  string
+	Key   string
+}
+
+func NewProxyConnection(backConnAddrr, proxyAddr string, tlsConfig *TLSConfig) (*proxyConnection, error) {
 	var conn net.Conn
 	var err error
 
-	if noTLS {
+	if tlsConfig.NoTLS {
 		conn, err = net.Dial("tcp", proxyAddr)
 		if err != nil {
 			return nil, err
@@ -44,7 +52,30 @@ func NewProxyConnection(backConnAddrr, proxyAddr string, noTLS bool) (*proxyConn
 		if err != nil {
 			return nil, err
 		}
-		conn, err = tls.Dial("tcp", proxyAddr, &tls.Config{RootCAs: roots})
+		tc := tls.Config{RootCAs: roots}
+
+		if _, err := os.Stat(tlsConfig.CA); err == nil {
+			ca, err := os.ReadFile(tlsConfig.CA)
+			if err != nil {
+				return nil, err
+			}
+			caPool := x509.NewCertPool()
+			caPool.AppendCertsFromPEM(ca)
+			tc.ClientCAs = caPool
+			tc.SessionTicketsDisabled = true
+			tc.ClientAuth = tls.RequireAndVerifyClientCert
+		}
+
+		if tlsConfig.Cert != "" && tlsConfig.Key != "" {
+			cert, err := tls.LoadX509KeyPair(tlsConfig.Cert, tlsConfig.Key)
+			if err != nil {
+				return nil, err
+			}
+			tc.Certificates = make([]tls.Certificate, 1)
+			tc.Certificates[0] = cert
+		}
+
+		conn, err = tls.Dial("tcp", proxyAddr, &tc)
 		if err != nil {
 			return nil, err
 		}

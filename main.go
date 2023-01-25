@@ -84,7 +84,9 @@ Flags:
 	detachKeys := flag.String("detach-keys", "ctrl-o,ctrl-c", "[c] Sequence of keys to press for closing the connection. Supported: https://godoc.org/github.com/moby/term#pkg-variables.")
 	allowTunneling := flag.Bool("A", false, "[s] Allow clients to create a TCP tunnel")
 	tunnelConfig := flag.String("L", "", "[c] TCP tunneling addresses: local_port:remote_host:remote_port. The client will listen on local_port for TCP connections, and will forward those to the from the server side to remote_host:remote_port")
-
+	ca := flag.String("ca", "", "ca certificate file")
+	cert := flag.String("cert", "", "certificate file")
+	key := flag.String("key", "", "private key")
 	verbose := flag.Bool("verbose", false, "Verbose logging")
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "%s", usageString)
@@ -139,7 +141,14 @@ Flags:
 	sessionID := ""
 	publicURL := ""
 	if *publicSession {
-		proxy, err := proxy.NewProxyConnection(*listenAddress, *proxyServerAddress, *noTLS)
+		tlsConfig := &proxy.TLSConfig{
+			NoTLS: *noTLS,
+			CA:    *ca,
+			Cert:  *cert,
+			Key:   *key,
+		}
+
+		proxy, err := proxy.NewProxyConnection(*listenAddress, *proxyServerAddress, tlsConfig)
 		if err != nil {
 			log.Errorf("Can't connect to the proxy: %s\n", err.Error())
 			return
