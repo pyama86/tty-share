@@ -1,7 +1,7 @@
 
 server/frontend/node_modules
 server/frontend/public
-
+dist
 out
 .DS_Store
 playground/

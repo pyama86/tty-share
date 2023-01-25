@@ -1,0 +1,29 @@
+brews:
+- tap:
+    owner: pyama86
+    name: homebrew-ptools
+  commit_author:
+    name: pyama86
+    email: www.kazu.com@gmail.com
+  description: "tty share to somebody"
+  homepage: "https://github.com/pyama86/tty-share"
+  install: |
+    bin.install 'tty-share'
+  test: |
+    system "#{bin}/tty-share"
+builds:
+- id: macos
+  goos:
+  - darwin
+  goarch:
+  - amd64
+  - arm64
+  main: .
+  binary: tty-share
+- id: linux
+  goos:
+  - linux
+  goarch:
+  - amd64
+  main: .
+  binary: tty-share
