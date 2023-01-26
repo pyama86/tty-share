@@ -31,14 +31,9 @@ class TTYReceiver {
         this.xterminal.open(container);
 
         connection.onclose =  (evt: CloseEvent) => {
-
            this.xterminal.blur();
            this.xterminal.options.cursorBlink = false
            this.xterminal.clear();
-
-           setTimeout(() => {
-            this.xterminal.write('Session closed');
-           }, 1000)
         }
 
         this.xterminal.focus();
