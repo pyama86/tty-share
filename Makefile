@@ -18,5 +18,7 @@ release_minor:
 release_patch:
 	git semv patch --bump
 
+frontend:
+	cd server/frontend && npm install && npm run build
 release:
 	goreleaser --rm-dist --skip-validate

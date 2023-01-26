@@ -1,5 +1,7 @@
 import { Terminal, IEvent, IDisposable } from "xterm";
 
+import ReconnectingWebSocket from 'reconnecting-websocket';
+
 import base64 from './base64';
 
 interface IRectSize {
@@ -13,7 +15,7 @@ class TTYReceiver {
 
     constructor(wsAddress: string, container: HTMLDivElement) {
         console.log("Opening WS connection to ", wsAddress)
-        const connection = new WebSocket(wsAddress);
+        const connection = new ReconnectingWebSocket(wsAddress, null, {connectionTimeout: 1000, maxRetries: 10});
 
         // TODO: expose some of these options in the UI
         this.xterminal = new Terminal({
