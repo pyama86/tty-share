@@ -20,5 +20,5 @@ release_patch:
 
 frontend:
 	cd server/frontend && npm install && npm run build
-release:
+release: frontend
 	goreleaser --rm-dist --skip-validate
