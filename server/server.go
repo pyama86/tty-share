@@ -275,10 +275,8 @@ func (server *TTYServer) handleWithTemplateHtml(responseWriter http.ResponseWrit
 
 }
 
-func (server *TTYServer) Run() (err error) {
-	err = server.httpServer.ListenAndServe()
-	log.Debug("Server finished")
-	return
+func (server *TTYServer) Run() error {
+	return server.httpServer.ListenAndServe()
 }
 
 func (server *TTYServer) Write(buff []byte) (written int, err error) {
